@@ -10,12 +10,13 @@ exports.get_reviews = async (req, res, next) => {
 }
 
 exports.create_review = function(req, res) {
-    const review = new Review({
+    const review = new Review({ // add validation
         review: req.body.review,
         restaurantId: req.body.restaurantId,
-        foodRating: req.body.foodRating,
-        drinkRating: req.body.drinkRating,
-        hangoutRating: req.body.hangoutRating,
+        foodRating: req.body.foodRating || "N/A",
+        drinkRating: req.body.drinkRating || "N/A",
+        hangoutRating: req.body.hangoutRating || "N/A",
+        studyRating: req.body.studyRating || "N/A",
         date: Date.now()
     }).save()
     .then(() => res.json("Review added!"))
