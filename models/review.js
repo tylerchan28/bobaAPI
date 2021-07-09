@@ -12,11 +12,6 @@ var ReviewSchema = new Schema({
     date: { type: Date, default: DateTime.fromJSDate(Date.now()).toLocaleString(DateTime.DATE_MED) },
 })
 
-ReviewSchema
-    .virtual("date_formatted")
-    .get(function() {
-        return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
-    })
 
 module.exports = mongoose.model("Review", ReviewSchema)
 

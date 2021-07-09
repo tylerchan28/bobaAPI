@@ -8,31 +8,45 @@ exports.user_signup_post = [
       .isAlphanumeric().withMessage("First name has non-alphanumeric characters"),
     body("lastName").trim().isLength({ min: 1 }).escape().withMessage("Last name must be specified")
       .isAlphanumeric().withMessage("Last name has non-alphanumeric characters"),
-    body("email").trim().isLength({ min: 1 }).escape().withMessage("Email must be specified as it is used as your login name"),
-    body("password").trim().isLength({ min: 1 }).escape().withMessage("Password must be specified"),,
+    body("username").trim().isLength({ min: 1 }).escape().withMessage("Username be specified as it is used as your login")
+      .isAlphanumeric().withMessage("Username has non-alphanumeric characters")
+      .custom(async (username) => {
+        try {
+          const existingUsername = await User.findOne({ username: username })
+          if (existingUsername) {
+            throw new Error ("Username is already taken")
+          }
+        }
+        catch (err) {
+            throw new Error(err)
+        }
+      }),
+    body("password").trim().isLength({ min: 1 }).escape().withMessage("Password must be specified"),
     (req, res, next) => {
       const errors = validationResult(req)
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: result.array() })
+        return res.status(400).json({ errors })
       } else {
         bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
           const user = new User({
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email: req.body.email,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            username: req.body.username,
             password: hashedPassword,
           }).save()
-            .then(() => res.json("Sign up successful"))
+            .then(() => res.json("Sign up successful!"))
             .catch(err => res.status(500).json("Error: " + err)) 
         })
       }
     }
   ]
 
-  exports.user_login_post = passport.authenticate("local", {
-    
-  })
 
+  exports.user_login_post = passport.authenticate("local", {
+    failureRedirect: "/login",
+    successRedirect: "/",
+  });
+  
   exports.user_logout_get = function (req, res) {
       req.logout();
       
