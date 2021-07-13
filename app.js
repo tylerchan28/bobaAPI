@@ -2,13 +2,16 @@ require("dotenv").config();
 var bcrypt = require("bcryptjs")
 var createError = require('http-errors');
 var express = require('express');
-var passport = require("passport");
+var passport = require("passport"); 
 var session = require("express-session");
 var LocalStrategy = require("passport-local").Strategy;
+var JWTStrategy = require("passport-jwt").Strategy;
+var ExtractJwt = require("passport-jwt").ExtractJwt;
 const User = require("./models/user");
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require("cors");
+var app = express();
 
 // MongoDB Connection
 var mongoose = require("mongoose");
@@ -22,7 +25,6 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users.js');
 var reviewsRouter = require("./routes/reviews.js");
 
-var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,10 +35,54 @@ app.use(cors({
     credentials: true,
   })
 );
-app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
-app.use(cookieParser("example-secret"));
+app.use(session({ secret: "cats", resave: true, saveUninitialized: true }));
+app.use(cookieParser("cats"));
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+// function verifyToken (req, res, next) {
+//   const bearerHeader = req.headers["authorization"]
+//   if (typeof bearerHeader !== "undefined") {
+//     const bearer = bearerHeader.split(" ")
+//     const bearerToken = bearer[1]
+//     req.token = bearerToken
+//   } else {
+//     res.sendStatus(403)
+//   }
+// }
+
+const opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = "cats";
+
+// passport.use(
+//   new JWTStrategy(opts, (jwt_payload, done) => {
+//     User.findById(jwt_payload.id)
+//       .then(user => {
+//         if (user) {
+//           return done(null, user)
+//         }
+//         return done(null, false)
+//       })
+//       .catch(err => console.log(err))
+//   })
+// )
+
+passport.use(
+  new JWTStrategy(opts, (jwt_payload, done) => {
+    User.findById(jwt_payload._id, (err, user) => {
+      if (err) {
+        return done(err, false)
+      }
+      if (user) {
+        return done(null, user)
+      } else {
+        return done(null, false)
+      }
+    })
+  })
+)
 
 passport.use(
   new LocalStrategy((username, password, done) => {
@@ -56,17 +102,18 @@ passport.use(
   })
 )
 
-passport.serializeUser(function(user, done) { // creates cookie with user id
-  console.log("serializing")
-  done(null, user.id);
-});
 
-passport.deserializeUser((id, done) => { // returns user from cookie (not being called)
-  console.log("deserializing")
-  User.findById({ _id: id}, (err, user) => {
-    done(err, user);
-  });
-});
+// passport.serializeUser(function(user, done) { // creates cookie with user id
+//   console.log("serializing")
+//   done(null, user.id);
+// });
+
+// passport.deserializeUser((id, done) => { // returns user from cookie (not being called)
+//   console.log("deserializing")
+//   User.findById(id, (err, user) => {
+//     done(err, user);
+//   });
+// });
 
 
 app.use(logger('dev'));
@@ -74,8 +121,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-
 
 // app.use(cors());
 // app.options('*', cors())

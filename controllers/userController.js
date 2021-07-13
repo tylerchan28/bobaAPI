@@ -2,6 +2,7 @@ var User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
+const jwt = require("jsonwebtoken");
 
 exports.user_signup_post = [
     body("firstName").trim().isLength({ min: 1 }).escape().withMessage("First name must be specified")
@@ -46,22 +47,33 @@ exports.user_signup_post = [
   exports.user_logout_get = function (req, res) {
       req.logout();
   }
+  
+  // exports.user_login_post = (req, res, next) => {
+  //   passport.authenticate("local", { session: false }, (err, user, info) => {
+  //     if (err || !user) {
+  //       return res.status(400).json("Username or password is incorrect")
+  //     }
+  //     if (err) res.send(err)
+  //     jwt.sign({ _id: user._id, email: user.username }, "cats", { expiresIn: 3600 }, (err, token) => {
+  //       if (err) return res.status(400).json(err)
+  //       res.json({ message: "auth passed", token: token, user: { _id: user._id, username: user.username }})
+  //     })
+  //   })(req, res)
+  // } 
 
-  exports.user_login_post = function (req, res, next) {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) throw err;
-      if (!user) {
-        return res.status(400).send(({ error: "Incorrect username or password"}))
-      } else {
-        req.logIn(user, (err) => {
-          if (err) throw err;
-          res.send(req.user);
-        });
+  exports.user_login_post = (req, res, next) => {
+    passport.authenticate("local", { session: false }, (err, user, info) => {
+      if (err || !user) {
+        return res.status(400).json("Username or password is incorrect")
       }
-    })(req, res, next);
-  };
-
-  exports.user_login_get = function (req, res) {
-    res.send(req.user);
+      req.login(user, { session: false }, (err) => {
+        if (err) {
+          res.send(err)
+        }
+        jwt.sign({ _id: user._id, username: user.username }, "cats", { expiresIn: "1d" }, (err, token) => {
+          if (err) return res.status(400).json(err)
+          res.json({ message: "auth passed", token: token, user: { _id: user._id, username: user.username }})
+        })
+      })
+    })(req, res)
   }
-
