@@ -33,6 +33,7 @@ exports.user_signup_post = [
             lastName: req.body.lastName,
             username: req.body.username,
             password: hashedPassword,
+            userId: req.body.userId
           }).save()
             .then(() => res.json("Sign up successful!"))
             .catch(err => res.status(500).json("Error: " + err)) 
@@ -41,13 +42,26 @@ exports.user_signup_post = [
     }
   ]
 
-
-  exports.user_login_post = passport.authenticate("local", {
-    failureRedirect: "/login",
-    successRedirect: "/",
-  });
   
   exports.user_logout_get = function (req, res) {
       req.logout();
-      
   }
+
+  exports.user_login_post = function (req, res, next) {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) throw err;
+      if (!user) {
+        return res.status(400).send(({ error: "Incorrect username or password"}))
+      } else {
+        req.logIn(user, (err) => {
+          if (err) throw err;
+          res.send(req.user);
+        });
+      }
+    })(req, res, next);
+  };
+
+  exports.user_login_get = function (req, res) {
+    res.send(req.user);
+  }
+

@@ -22,5 +22,3 @@ exports.create_review = function(req, res) {
     .then(() => res.json("Review added!"))
     .catch(err => res.json("Error: " + err));
 }
-
-// add userId: req.body.userId, when user login implemented
