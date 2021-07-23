@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+var secret = process.env.SECRET;
 
 exports.user_signup_post = [
     body("firstName").trim().isLength({ min: 1 }).escape().withMessage("First name must be specified")
@@ -30,6 +31,7 @@ exports.user_signup_post = [
       } else {
         bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
           const user = new User({
+            email: req.body.email,
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             username: req.body.username,
@@ -48,31 +50,19 @@ exports.user_signup_post = [
       req.logout();
   }
   
-  // exports.user_login_post = (req, res, next) => {
-  //   passport.authenticate("local", { session: false }, (err, user, info) => {
-  //     if (err || !user) {
-  //       return res.status(400).json("Username or password is incorrect")
-  //     }
-  //     if (err) res.send(err)
-  //     jwt.sign({ _id: user._id, email: user.username }, "cats", { expiresIn: 3600 }, (err, token) => {
-  //       if (err) return res.status(400).json(err)
-  //       res.json({ message: "auth passed", token: token, user: { _id: user._id, username: user.username }})
-  //     })
-  //   })(req, res)
-  // } 
 
   exports.user_login_post = (req, res, next) => {
     passport.authenticate("local", { session: false }, (err, user, info) => {
       if (err || !user) {
-        return res.status(400).json("Username or password is incorrect")
+        return res.status(400).json("Incorrect username or password.")
       }
       req.login(user, { session: false }, (err) => {
         if (err) {
           res.send(err)
         }
-        jwt.sign({ _id: user._id, username: user.username }, "cats", { expiresIn: "1d" }, (err, token) => {
+        jwt.sign({ _id: user._id, username: user.username }, secret, { expiresIn: "1d" }, (err, token) => {
           if (err) return res.status(400).json(err)
-          res.json({ message: "auth passed", token: token, user: { _id: user._id, username: user.username }})
+          res.json({ message: "auth passed", token: "Bearer " + token, user: { userId: user.userId, username: user.username }})
         })
       })
     })(req, res)

@@ -24,6 +24,7 @@ var path = require('path');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users.js');
 var reviewsRouter = require("./routes/reviews.js");
+var citiesRouter = require("./routes/cities.js");
 
 
 // view engine setup
@@ -35,39 +36,16 @@ app.use(cors({
     credentials: true,
   })
 );
-app.use(session({ secret: "cats", resave: true, saveUninitialized: true }));
-app.use(cookieParser("cats"));
+
+var secret = process.env.SECRET;
+
+app.use(session({ secret: secret, resave: true, saveUninitialized: true }));
+app.use(cookieParser());
 app.use(passport.initialize());
-app.use(passport.session());
-
-
-// function verifyToken (req, res, next) {
-//   const bearerHeader = req.headers["authorization"]
-//   if (typeof bearerHeader !== "undefined") {
-//     const bearer = bearerHeader.split(" ")
-//     const bearerToken = bearer[1]
-//     req.token = bearerToken
-//   } else {
-//     res.sendStatus(403)
-//   }
-// }
-
 const opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = "cats";
+opts.secretOrKey = secret;
 
-// passport.use(
-//   new JWTStrategy(opts, (jwt_payload, done) => {
-//     User.findById(jwt_payload.id)
-//       .then(user => {
-//         if (user) {
-//           return done(null, user)
-//         }
-//         return done(null, false)
-//       })
-//       .catch(err => console.log(err))
-//   })
-// )
 
 passport.use(
   new JWTStrategy(opts, (jwt_payload, done) => {
@@ -103,23 +81,9 @@ passport.use(
 )
 
 
-// passport.serializeUser(function(user, done) { // creates cookie with user id
-//   console.log("serializing")
-//   done(null, user.id);
-// });
-
-// passport.deserializeUser((id, done) => { // returns user from cookie (not being called)
-//   console.log("deserializing")
-//   User.findById(id, (err, user) => {
-//     done(err, user);
-//   });
-// });
-
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // app.use(cors());
@@ -127,6 +91,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/reviews', reviewsRouter);
+app.use('/cities', citiesRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
