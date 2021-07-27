@@ -54,11 +54,3 @@ exports.update_review = function(req, res) {
             }
         })
 }
-
-// { 
-//     review: req.body.review,
-//     foodRating: req.body.foodRating || "N/A",
-//     drinkRating: req.body.drinkRating || "N/A",
-//     hangoutRating: req.body.hangoutRating || "N/A",
-//     studyRating: req.body.studyRating || "N/A"
-// }
