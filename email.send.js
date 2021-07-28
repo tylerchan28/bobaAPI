@@ -12,9 +12,9 @@ const credentials = {
 
 const transporter = nodemailer.createTransport(credentials);
 
-module.exports = async (to, content) => {
+module.exports = async (to, content) => {   
     const contacts = {
-        from: process.env.MAIL_USER,
+        from: "bobaguidetest@gmail.com",
         to
     }
 
