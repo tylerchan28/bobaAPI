@@ -8,10 +8,7 @@ const sendEmail = require("../email.send");
 const templates = require("../email.templates");
 
 exports.user_signup_post = [
-    body("firstName").trim().isLength({ min: 1 }).escape().withMessage("First name must be specified")
-      .isAlphanumeric().withMessage("First name has non-alphanumeric characters"),
-    body("lastName").trim().isLength({ min: 1 }).escape().withMessage("Last name must be specified")
-      .isAlphanumeric().withMessage("Last name has non-alphanumeric characters"),
+    body("secretCode").trim().isLength({ min: 1 }).escape().withMessage("Secret must be specified"),
     body("username").trim().isLength({ min: 1 }).escape().withMessage("Username be specified as it is used as your login")
       .isAlphanumeric().withMessage("Username has non-alphanumeric characters")
       .custom(async (username) => {
@@ -46,8 +43,7 @@ exports.user_signup_post = [
         bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
           const user = new User({
             email: req.body.email,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
+            secretCode: req.body.secretCode,
             username: req.body.username,
             password: hashedPassword,
             userId: req.body.userId
@@ -106,7 +102,7 @@ exports.user_signup_post = [
           res.json({ msg: "Couldn't find a valid user."})
         } else if (user && user.verified === false) {
           User.findByIdAndUpdate(req.params.id, { verified: true})
-            .then(() => res.json({ msg: "Your account has been verified."}))
+            .then(() => res.json({ msg: "Your account has been verified. Log in to start writing reviews."}))
         } else {
           res.json({ msg: "Your account has already been verified."})
         }
@@ -133,11 +129,11 @@ exports.user_signup_post = [
     bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
       User.findById(req.params.id)
       .then(user => {
-        if (!user) {
-          res.json({ msg: "Couldn't find a valid user."})
+        if (req.body.secretCode !== user.secretCode) {
+          res.json({ msg: "Your secret code is not correct."})
         } else {
           User.findByIdAndUpdate(req.params.id, { password: hashedPassword })
-            .then(() => res.json({ msg: "Your password has been changed"}))
+            .then(() => res.json({ msg: "Your password has succesffuly been changed."}))
         }
       })
       .catch(err => console.log(err))
