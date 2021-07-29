@@ -11,10 +11,11 @@ module.exports = {
       text: `Copy and paste this link: http://localhost:3001/confirm/${id}`
     }),
     
-    reset: id => ({
+    reset: (id, code) => ({
       subject: "Boba Guide -- Reset Password",
       html: `
       Reset your password by clicking on the link below.
+      Your code is ${code}.
       <a href='http://localhost:3001/reset-password/${id}'>
         Click here to reset your password.
       </a>

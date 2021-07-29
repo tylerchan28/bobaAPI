@@ -1,4 +1,5 @@
 var User = require("../models/user");
+var Verification = require("../models/verification");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
@@ -6,9 +7,9 @@ const jwt = require("jsonwebtoken");
 var secret = process.env.SECRET;
 const sendEmail = require("../email.send");
 const templates = require("../email.templates");
+const makeid = require("../generateCodeHelper");
 
 exports.user_signup_post = [
-    body("secretCode").trim().isLength({ min: 1 }).escape().withMessage("Secret must be specified"),
     body("username").trim().isLength({ min: 1 }).escape().withMessage("Username be specified as it is used as your login")
       .isAlphanumeric().withMessage("Username has non-alphanumeric characters")
       .custom(async (username) => {
@@ -43,7 +44,6 @@ exports.user_signup_post = [
         bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
           const user = new User({
             email: req.body.email,
-            secretCode: req.body.secretCode,
             username: req.body.username,
             password: hashedPassword,
             userId: req.body.userId
@@ -117,9 +117,15 @@ exports.user_signup_post = [
         if (!user) {
           res.json({ msg: "Couldn't find a valid user."})
         } else {
-          sendEmail(user.email, templates.reset(user._id))
-            .then(() => res.json({ msg: "Email sent. please check your inbox to reset your password."}))
-            .catch(err => console.log(err))
+          const code = makeid(5);
+          const verification = new Verification({
+            email: req.body.email,
+            code: code
+          }).save().then(() => {
+            sendEmail(user.email, templates.reset(user._id, code))
+              .then(() => res.json({ msg: "Email sent. please check your inbox to reset your password."}))
+              .catch(err => console.log(err))
+          })
         }
       })
   }
@@ -127,17 +133,16 @@ exports.user_signup_post = [
 
   exports.user_reset_password = (req, res) => {
     bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
-      User.findById(req.params.id)
-      .then(user => {
-        if (req.body.secretCode !== user.secretCode) {
-          res.json({ msg: "Your secret code is not correct."})
-        } else {
-          User.findByIdAndUpdate(req.params.id, { password: hashedPassword })
-            .then(() => res.json({ msg: "Your password has succesffuly been changed."}))
-        }
+      Verification.findOne(req.body.email)
+        .then(verification => {
+          if (verification.code !== req.body.secretCode) {
+            res.json({ msg: "Your secret code is not correct."})
+          } else { 
+            verification.delete()
+            User.findByIdAndUpdate(req.params.id, { password: hashedPassword })
+              .then(() => res.json({ msg: "Your password has successfully been changed."}))
+          }
+          })
+        .catch(err => console.log(err))
       })
-      .catch(err => console.log(err))
     }
-  )}
-
-
