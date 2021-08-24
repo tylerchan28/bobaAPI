@@ -87,7 +87,7 @@ exports.user_signup_post = [
           res.json({ msg: "Couldn't find a valid user."})
         } else if (user && user.verified === false ) {
           sendEmail(user.email, templates.confirm(user._id))
-            .then(() => res.json({ msg: "Email sent, please check your inbox to verify your account."}))
+            .then(() => res.json({ msg: "Email sent, please check your inbox/spam to verify your account."}))
             .catch(err => console.log(err))
         } else {
           res.json({ msg: "Your account has already been verified."})

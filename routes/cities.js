@@ -5,5 +5,6 @@ var citiesController = require("../controllers/cityController");
 router.get("/san-gabriel", citiesController.san_gabriel_get);
 router.get("/san-francisco", citiesController.san_francisco_get);
 router.get("/manhattan", citiesController.manhattan_get);
+router.get("/matcha", citiesController.city_get)
 
 module.exports = router;

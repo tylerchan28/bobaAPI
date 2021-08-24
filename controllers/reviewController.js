@@ -1,4 +1,5 @@
 var Review = require("../models/review");
+var User = require("../models/user");
 
 exports.get_reviews = async (req, res, next) => {
     try {
@@ -10,7 +11,7 @@ exports.get_reviews = async (req, res, next) => {
 }
 
 exports.create_review = function(req, res) {
-    const review = new Review({ // add validation
+    const review = new Review({ 
         review: req.body.review,
         reviewId: req.body.reviewId,
         restaurantId: req.body.restaurantId,
@@ -22,7 +23,8 @@ exports.create_review = function(req, res) {
         user: req.body.user,
         date: Date.now()
     }).save()
-    .then(() => res.json("Review added!"))
+    .then(() => res.json("Review added."))
+    // .then(() => User.findOne({ userId: req.body.userId }).populate("reviews"))
     .catch(err => res.json("Error: " + err));
 }
 

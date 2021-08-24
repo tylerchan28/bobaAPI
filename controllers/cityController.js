@@ -25,3 +25,12 @@ exports.manhattan_get = async (req, res, next) => {
         res.status(404).json({ message: err.message })
     }
 }
+
+exports.city_get = async (req, res, next) => {
+    try {
+        const city = await City.find({ "restaurants": { $elemMatch: { id: "sSiUcnbwPQ4ssHY3EMV0Fw" }}})
+            .then(city => res.json(city)) 
+    } catch (err) {
+        res.status(404).json({ message: err.message })
+    }
+}

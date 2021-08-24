@@ -6,7 +6,8 @@ var UserSchema = new Schema({
     username: { type: String, maxLength: 100, required: true, unique: true },
     password: { type: String, maxLength: 100, required: true },
     userId: { type: String, maxLength: 100, required: true, unique: true },
-    verified: { type: Boolean, default: false, required: true }
+    verified: { type: Boolean, default: false, required: true },
+    reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }]
 })
 
 
