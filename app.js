@@ -41,9 +41,10 @@ var secret = process.env.SECRET;
 app.use(session({ secret: secret, resave: true, saveUninitialized: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
-const opts = {}
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = secret;
+const opts = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secret
+};
 
 
 passport.use(
