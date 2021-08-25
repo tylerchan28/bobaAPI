@@ -31,11 +31,6 @@ var citiesRouter = require("./routes/cities.js");
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(cors({
-    origin: "https://boba-guide-tyler.herokuapp.com"
-  })
-);
-
 var secret = process.env.SECRET;
 
 app.use(session({ secret: secret, resave: true, saveUninitialized: true }));
@@ -86,8 +81,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(cors());
-// app.options('*', cors())
+app.use(cors());
+app.options('*', cors())
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/reviews', reviewsRouter);
