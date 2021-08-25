@@ -32,7 +32,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(cors({
-    origin: "http://localhost:3001",
+    origin: "https://boba-guide-tyler.herokuapp.com/",
     credentials: true,
   })
 );
