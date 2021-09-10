@@ -7,6 +7,7 @@ var CitySchema = new Schema({
     name: { type: String, maxLength: 100, required: true },
     location: { type: Object },
     display_phone: { type: String, maxLength: 100 },
+    restaurants: { type: Array, maxLength: 100 }
 })
 
 

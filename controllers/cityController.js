@@ -28,8 +28,23 @@ exports.manhattan_get = async (req, res, next) => {
 
 exports.city_get = async (req, res, next) => {
     try {
-        const city = await City.find({ "restaurants": { $elemMatch: { id: "sSiUcnbwPQ4ssHY3EMV0Fw" }}})
-            .then(city => res.json(city)) 
+        const cityRestaurants = await City.find({ name: req.params.city})
+            .then(restaurants => res.json(restaurants))
+    } catch (err) {
+        res.status(404).json({ message: err.message })
+    } 
+}
+
+exports.shop_get = async (req, res, next) => {
+    try {
+        const city = await City.find({ "restaurants": { $elemMatch: { id: req.params.id }}})
+            .then((data) => {
+                let info = data[0].restaurants;
+                let foundShop = info.filter(function(shop) {
+                    return shop.id === req.params.id
+                })
+                return res.json(foundShop)
+            }) 
     } catch (err) {
         res.status(404).json({ message: err.message })
     }

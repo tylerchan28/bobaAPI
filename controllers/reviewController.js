@@ -24,7 +24,6 @@ exports.create_review = function(req, res) {
         date: Date.now()
     }).save()
     .then(() => res.json("Review added."))
-    // .then(() => User.findOne({ userId: req.body.userId }).populate("reviews"))
     .catch(err => res.json("Error: " + err));
 }
 
