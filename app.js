@@ -75,19 +75,19 @@ passport.use(
   })
 )
 
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors());
-app.options('*', cors())
-// app.use(cors({
-//   origin: "https://boba-guide-tyler.herokuapp.com",
-//   credentials: true,
-// }) FOR PRODUCTION
-// );
+// app.use(cors());
+// app.options('*', cors())
+app.use(cors({
+  origin: "https://boba-guide-tyler.herokuapp.com",
+  // origin: "http://localhost:3001", 
+  credentials: true,
+}) 
+);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -110,3 +110,5 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+
